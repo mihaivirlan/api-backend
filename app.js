@@ -1,31 +1,16 @@
 var express = require("express");
 var utils = require("./utils.js");
-var db = require("./env.js")
+var bodyParser = require('body-parser');
+var multer = require('multer');
+var upload = multer(); // for parsing multipart/form-data
+
 
 var app = express();
 
-var mysql = require('mysql')
-var connection = mysql.createConnection({
- host     : db.mysql.host,
- user     : db.mysql.user,
- password : db.mysql.password,
- database : db.mysql.database
-});
-
-connection.connect()
-
-connection.query('SELECT 1 + 1 AS solution', function (err, rows, fields) {
-  if (err) throw err
-
- console.log('The solution is: ', rows[0].solution);
- //console.log(err);
-})
-
-connection.end()
-
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 1000000 })); // for parsing application/x-www-form-urlencoded
 app.route("/data")
     .get(utils.getFunction)
-    .post(utils.postFunction)
+    .post(utils.postFunction, upload.array('img', 1))
     .patch(utils.patchFunction)
     .put(utils.putFunction)
     .delete(utils.deleteFunction);
